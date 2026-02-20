@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday, My Love 💖</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --pink: #f472b6;
+    --rose: #e11d48;
+    --bg: #0c0a09;
+    --card-bg: rgba(15, 10, 20, 0.65);
+    --text: #f1e8f0;
+    --muted: #c4afc2;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Aurora */
+  #aurora {
+    position: fixed; inset: 0; z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .aurora-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0;
+    animation: auroraFloat linear infinite;
+  }
+  .a1 { width: 65vw; height: 65vw; background: hsla(333,70%,55%,.4); top: -15%; left: -15%; animation-duration: 18s; }
+  .a2 { width: 55vw; height: 55vw; background: hsla(282,82%,54%,.3); top: 15%; right: -18%; animation-duration: 22s; animation-delay: -5s; }
+  .a3 { width: 60vw; height: 60vw; background: hsla(210,89%,60%,.3); bottom: -15%; left: 15%; animation-duration: 20s; animation-delay: -10s; }
+  .a4 { width: 45vw; height: 45vw; background: hsla(35,90%,60%,.3); top: 35%; left: 25%; animation-duration: 25s; animation-delay: -8s; }
+
+  @keyframes auroraFloat {
+    0%   { opacity: 0; transform: translate(0,0) scale(1); }
+    20%  { opacity: 1; }
+    50%  { transform: translate(8%,6%) scale(1.12); }
+    80%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(-4%,-3%) scale(.95); }
+  }
+
+  #three-canvas {
+    position: fixed; inset: 0; z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Progress Bar */
+  #progress-wrap {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    z-index: 100;
+    width: min(400px, 90vw);
+  }
+  #progress-track {
+    height: 4px; border-radius: 99px;
+    background: rgba(255,255,255,0.12);
+    overflow: hidden;
+  }
+  #progress-bar {
+    height: 100%; width: 20%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--pink), var(--rose));
+    box-shadow: 0 0 14px rgba(244,114,182,0.8);
+    transition: width 0.65s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* Steps Container */
+  #steps {
+    position: relative; z-index: 10;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 70px 20px 50px;
+  }
+
+  .step {
+    display: none;
+    width: 100%; max-width: 560px;
+    opacity: 0;
+  }
+  .step.active { display: block; }
+
+  /* Glass Card */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 28px;
+    padding: 52px 44px 44px;
+    backdrop-filter: blur(36px) saturate(180%);
+    box-shadow:
+      0 8px 60px rgba(0,0,0,0.55),
+      0 0 0 0.5px rgba(255,255,255,0.06) inset,
+      0 -1px 0 rgba(255,255,255,0.08) inset;
+  }
+
+  .step-icon {
+    font-size: 3.8rem;
+    display: block;
+    text-align: center;
+    margin-bottom: 26px;
+    filter: drop-shadow(0 0 22px rgba(244,114,182,0.65));
+  }
+  .heart-beat { animation: heartbeat 1.4s ease-in-out infinite; }
+  @keyframes heartbeat {
+    0%,100% { transform: scale(1); filter: drop-shadow(0 0 16px rgba(244,114,182,.6)); }
+    14% { transform: scale(1.2); filter: drop-shadow(0 0 32px rgba(244,114,182,.95)); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.1); filter: drop-shadow(0 0 26px rgba(244,114,182,.8)); }
+    56% { transform: scale(1); }
+  }
+
+  h1, h2 {
+    font-family: 'Playfair Display', serif;
+    background: linear-gradient(135deg, #fce7f3 0%, #f9a8d4 40%, #ffffff 70%, #fce7f3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    line-height: 1.25;
+    margin-bottom: 18px;
+  }
+  h1 { font-size: clamp(2rem, 5.5vw, 2.9rem); }
+  h2 { font-size: clamp(1.45rem, 4vw, 2.1rem); }
+
+  p {
+    color: var(--muted);
+    text-align: center;
+    font-size: 1.05rem;
+    line-height: 1.8;
+    font-weight: 300;
+    margin-bottom: 34px;
+  }
+
+  .btn {
+    display: block;
+    margin: 0 auto;
+    padding: 15px 38px;
+    border: none; cursor: pointer;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f472b6, #e11d48);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    box-shadow: 0 0 28px rgba(225,29,72,0.5), 0 4px 18px rgba(0,0,0,0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 0 44px rgba(225,29,72,0.7), 0 8px 28px rgba(0,0,0,0.4);
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(1px) scale(0.98);
+  }
+  .btn:disabled { cursor: default; }
+
+  /* Bento Grid */
+  .bento {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 34px;
+  }
+  .bento-card {
+    background: rgba(255,255,255,0.045);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 18px;
+    padding: 20px 18px;
+    backdrop-filter: blur(10px);
+    transition: background 0.3s, transform 0.25s;
+  }
+  .bento-card:hover {
+    background: rgba(244,114,182,0.1);
+    transform: translateY(-3px);
+  }
+  .bento-card.wide { grid-column: span 2; }
+  .bento-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.98rem;
+    color: #f9a8d4;
+    margin-bottom: 8px;
+  }
+  .bento-card p {
+    font-size: 0.87rem;
+    text-align: left;
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* Polaroid */
+  .polaroid-wrap {
+    perspective: 900px;
+    margin: 0 auto 32px;
+    width: fit-content;
+  }
+  .polaroid {
+    background: #fff;
+    padding: 14px 14px 54px;
+    border-radius: 4px;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.65), 0 0 35px rgba(244,114,182,0.22);
+    transform: rotate(-3.5deg);
+    transform-style: preserve-3d;
+    transition: transform 0.15s ease-out;
+    max-width: 240px;
+  }
+  .polaroid img {
+    width: 212px; height: 200px;
+    object-fit: cover;
+    display: block;
+    border-radius: 2px;
+  }
+  .polaroid .caption {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: #666;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.88rem;
+  }
+
+  #final-msg {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(1.2rem, 3.5vw, 1.5rem);
+    background: linear-gradient(135deg, #fce7f3, #f9a8d4, #ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    margin-bottom: 0;
+    opacity: 0;
+    transform: translateY(22px);
+    display: none;
+  }
+
+  .anim-item {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  @media (max-width: 500px) {
+    .card { padding: 38px 24px 34px; }
+    .polaroid { max-width: 210px; }
+    .polaroid img { width: 182px; height: 172px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="aurora">
+  <div class="aurora-orb a1"></div>
+  <div class="aurora-orb a2"></div>
+  <div class="aurora-orb a3"></div>
+  <div class="aurora-orb a4"></div>
+</div>
+
+<canvas id="three-canvas"></canvas>
+
+<div id="progress-wrap">
+  <div id="progress-track"><div id="progress-bar"></div></div>
+</div>
+
+<div id="steps">
+
+  <div class="step active" id="step-1">
+    <div class="card">
+      <span class="step-icon heart-beat anim-item">❤️</span>
+      <h1 class="anim-item">Hello, My Love,</h1>
+      <p class="anim-item">Every beat of my heart whispers your name. On this special day, I wanted to create a small piece of magic just for you.</p>
+      <button class="btn anim-item" onclick="nextStep(2)">UNWRAP MY FEELINGS</button>
+    </div>
+  </div>
+
+  <div class="step" id="step-2">
+    <div class="card">
+      <span class="step-icon anim-item">🎉</span>
+      <h2 class="anim-item">To My Wonderful Partner,<br>Happy Birthday!</h2>
+      <p class="anim-item">Your presence illuminates my world. Another year older, another year more beautiful, inside and out. I cherish you deeply.</p>
+      <button class="btn anim-item" onclick="nextStep(3)">DISCOVER MORE...</button>
+    </div>
+  </div>
+
+  <div class="step" id="step-3">
+    <div class="card">
+      <h2 class="anim-item">Countless Reasons Why I Adore You</h2>
+      <div class="bento anim-item">
+        <div class="bento-card wide">
+          <h3>💖 Your Infectious Laughter</h3>
+          <p>It's the most beautiful sound, a melody that brightens even the darkest days.</p>
+        </div>
+        <div class="bento-card">
+          <h3>✨ Your Unmatched Sense of Humour</h3>
+          <p>Your sense of humour can light up any room effortlessly.</p>
+        </div>
+        <div class="bento-card">
+          <h3>🌸 Your Gentle Soul</h3>
+          <p>The kindness and empathy you extend to everyone around you is truly inspiring.</p>
+        </div>
+      </div>
+      <button class="btn anim-item" onclick="nextStep(4)">REMEMBER OUR JOURNEY?</button>
+    </div>
+  </div>
+
+  <div class="step" id="step-4">
+    <div class="card">
+      <h2 class="anim-item">A Snapshot of Our Story...</h2>
+      <div class="polaroid-wrap anim-item" id="polaroid-wrap">
+        <div class="polaroid" id="polaroid">
+          <img src="https://i.ibb.co/6Z6XgCg/crush.webp" alt="Our favorite memory">
+          <div class="caption">Our favorite memory.</div>
+        </div>
+      </div>
+      <p class="anim-item">Every shared glance, every soft touch, every adventure with you becomes a cherished masterpiece in my heart.</p>
+      <button class="btn anim-item" onclick="nextStep(5)">ONE FINAL THOUGHT...</button>
+    </div>
+  </div>
+
+  <div class="step" id="step-5">
+    <div class="card">
+      <span class="step-icon anim-item">💖</span>
+      <h2 class="anim-item">My Deepest Wish For You</h2>
+      <p class="anim-item">May this year be filled with boundless joy, new discoveries, and the realization of every dream your beautiful heart holds. You deserve it all.</p>
+      <button class="btn anim-item" id="celebrate-btn" onclick="celebrate()">LET'S CELEBRATE!</button>
+      <p id="final-msg">Happy Birthday, My Sweetest Love! ❤️</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── Three.js 3D Hearts ───────────────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('three-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.z = 22;
+
+  function makeHeartShape(s) {
+    const shape = new THREE.Shape();
+    shape.moveTo(0, s * 0.25);
+    shape.bezierCurveTo(0, s * 0.55, s * 0.6, s * 0.55, s * 0.6, s * 0.25);
+    shape.bezierCurveTo(s * 0.6, -s * 0.05, s * 0.25, -s * 0.3, 0, -s * 0.55);
+    shape.bezierCurveTo(-s * 0.25, -s * 0.3, -s * 0.6, -s * 0.05, -s * 0.6, s * 0.25);
+    shape.bezierCurveTo(-s * 0.6, s * 0.55, 0, s * 0.55, 0, s * 0.25);
+    return new THREE.ShapeGeometry(shape);
+  }
+
+  const palette = [0xf472b6, 0xe11d48, 0xfb7185, 0xf9a8d4, 0xbe185d, 0xff6b8a, 0xfda4af];
+  const hearts = [];
+
+  for (let i = 0; i < 22; i++) {
+    const size = 0.35 + Math.random() * 1.1;
+    const geo = makeHeartShape(size);
+    const mat = new THREE.MeshBasicMaterial({
+      color: palette[Math.floor(Math.random() * palette.length)],
+      transparent: true,
+      opacity: 0.14 + Math.random() * 0.22,
+      side: THREE.DoubleSide,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(
+      (Math.random() - 0.5) * 42,
+      (Math.random() - 0.5) * 30,
+      (Math.random() - 0.5) * 14
+    );
+    mesh.rotation.z = Math.random() * Math.PI * 2;
+    mesh.userData = {
+      speed: 0.15 + Math.random() * 0.28,
+      phase: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.007,
+      origY: mesh.position.y,
+      origX: mesh.position.x,
+    };
+    scene.add(mesh);
+    hearts.push(mesh);
+  }
+
+  window._hearts = hearts;
+  window._celebrateTime = null;
+  window._celebrating = false;
+
+  function animate(t) {
+    requestAnimationFrame(animate);
+    const time = t * 0.001;
+
+    hearts.forEach(h => {
+      if (!window._celebrating) {
+        h.position.y = h.userData.origY + Math.sin(time * h.userData.speed + h.userData.phase) * 0.85;
+        h.rotation.z += h.userData.rotSpeed;
+        h.material.opacity = 0.1 + Math.abs(Math.sin(time * 0.28 + h.userData.phase)) * 0.22;
+      } else {
+        const elapsed = time - window._celebrateTime;
+        const angle = h.userData.phase + elapsed * h.userData.speed * 2.2;
+        const dist = elapsed * elapsed * 2.2;
+        h.position.x = h.userData.origX + Math.cos(angle) * dist;
+        h.position.y = h.userData.origY + Math.abs(Math.sin(angle)) * dist * 0.5 + elapsed * 2.5;
+        h.rotation.z += h.userData.rotSpeed * 4;
+        h.material.opacity = Math.max(0, 0.35 - elapsed * 0.1);
+      }
+    });
+
+    renderer.render(scene, camera);
+  }
+  requestAnimationFrame(animate);
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
+
+// ─── Polaroid Tilt ─────────────────────────────────────────────────────────
+const polaroidWrap = document.getElementById('polaroid-wrap');
+const polaroidEl = document.getElementById('polaroid');
+if (polaroidWrap) {
+  polaroidWrap.addEventListener('mousemove', e => {
+    const r = polaroidWrap.getBoundingClientRect();
+    const dx = (e.clientX - (r.left + r.width / 2)) / r.width;
+    const dy = (e.clientY - (r.top + r.height / 2)) / r.height;
+    polaroidEl.style.transform = `rotate(-3.5deg) rotateY(${dx * 20}deg) rotateX(${-dy * 15}deg)`;
+  });
+  polaroidWrap.addEventListener('mouseleave', () => {
+    polaroidEl.style.transform = 'rotate(-3.5deg)';
+  });
+}
+
+// ─── Step Navigation ───────────────────────────────────────────────────────
+const progressMap = { 1: '20%', 2: '40%', 3: '60%', 4: '80%', 5: '100%' };
+let currentStep = 1;
+
+function animateStepIn(num) {
+  const el = document.getElementById('step-' + num);
+  el.style.display = 'block';
+  const items = el.querySelectorAll('.anim-item');
+  gsap.set(el, { opacity: 0, y: 44 });
+  gsap.to(el, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' });
+  gsap.fromTo(items,
+    { opacity: 0, y: 24 },
+    { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, delay: 0.18, ease: 'power2.out' }
+  );
+  document.getElementById('progress-bar').style.width = progressMap[num];
+}
+
+window.nextStep = function(num) {
+  const prev = document.getElementById('step-' + currentStep);
+  gsap.to(prev, {
+    opacity: 0, y: -32, scale: 0.95, duration: 0.42, ease: 'power2.in',
+    onComplete() {
+      prev.style.display = 'none';
+      currentStep = num;
+      animateStepIn(num);
+    }
+  });
+};
+
+// Init
+animateStepIn(1);
+
+// ─── Celebration ───────────────────────────────────────────────────────────
+window.celebrate = function() {
+  const btn = document.getElementById('celebrate-btn');
+  btn.disabled = true;
+  gsap.to(btn, { opacity: 0, scale: 0.8, duration: 0.35, onComplete: () => btn.style.display = 'none' });
+
+  // Final message
+  const msg = document.getElementById('final-msg');
+  msg.style.display = 'block';
+  gsap.to(msg, { opacity: 1, y: 0, duration: 0.9, delay: 0.38, ease: 'power2.out' });
+
+  // Confetti corner bursts
+  const fire = (opts) => confetti({ ...opts });
+  setTimeout(() => {
+    fire({ particleCount: 130, spread: 70, origin: { x: 0, y: 1 }, angle: 62 });
+    fire({ particleCount: 130, spread: 70, origin: { x: 1, y: 1 }, angle: 118 });
+  }, 380);
+  setTimeout(() => {
+    fire({ particleCount: 90, spread: 100, origin: { x: 0.05, y: 0.85 }, angle: 72 });
+    fire({ particleCount: 90, spread: 100, origin: { x: 0.95, y: 0.85 }, angle: 108 });
+  }, 800);
+  setTimeout(() => {
+    fire({ particleCount: 70, spread: 140, origin: { x: 0.5, y: 1 }, angle: 90 });
+  }, 1200);
+
+  // Continuous shower
+  let count = 0;
+  const shower = setInterval(() => {
+    if (++count > 28) { clearInterval(shower); return; }
+    confetti({
+      particleCount: 20,
+      spread: 130,
+      origin: { x: Math.random(), y: -0.05 },
+      gravity: 0.65,
+      drift: (Math.random() - 0.5) * 0.6,
+      ticks: 220,
+      colors: ['#f472b6','#e11d48','#fce7f3','#a855f7','#f59e0b','#ffffff','#fb7185','#c084fc'],
+    });
+  }, 200);
+
+  // Hearts swirl away
+  window._celebrating = true;
+  window._celebrateTime = performance.now() * 0.001;
+  window._hearts.forEach(h => {
+    h.userData.origX = h.position.x;
+    h.userData.origY = h.position.y;
+  });
+};
+</script>
+</body>
+</html>
